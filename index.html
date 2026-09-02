@@ -1037,6 +1037,11 @@
             document.getElementById('printBtn').addEventListener('click', function() {
                 window.print();
             });
+
+            // 暴露灯箱函数到全局作用域（供 onclick 调用）
+            window.openLightbox = openLightbox;
+            window.closeLightbox = closeLightbox;
+        })();
         </script>
 
         <!-- 灯箱 -->
