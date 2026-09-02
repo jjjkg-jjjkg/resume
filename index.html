@@ -1035,7 +1035,7 @@
             setupBackTop();
             setupThemeToggle();
 
-            document.getElementById('lightbox').addEventListener('click', function(e) {
+            document.getElementById('lightbox')?.addEventListener('click', function(e) {
                 if (e.target === this || e.target.classList.contains('lightbox-close')) closeLightbox();
             });
             document.addEventListener('keydown', function(e) {
