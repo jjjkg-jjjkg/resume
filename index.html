@@ -515,6 +515,54 @@
             border: 1px solid var(--color-border);
         }
 
+        /* 证书图片 */
+        .cert-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+        .cert-img-card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            background: var(--color-card);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cert-img-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .cert-img-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+        .cert-img-caption {
+            text-align: center;
+            font-size: 0.8rem;
+            padding: 8px;
+            color: var(--text-secondary);
+        }
+        /* 灯箱 */
+        .lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; align-items: center; justify-content: center; z-index: 9999;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+        .lightbox-close { position: absolute; top: 20px; right: 30px; font-size: 2rem; color: #fff; cursor: pointer; background: none; border: none; }
+        .lightbox-caption { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; color: #fff; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            .cert-images { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+            .cert-img-card img { height: 100px; }
+            .cert-img-card .cert-img-caption { font-size: 0.72rem; padding: 6px 8px; }
+            .lightbox-close { top: 14px; right: 18px; font-size: 1.6rem; }
+            .lightbox-caption { bottom: 16px; font-size: 0.8rem; }
+        }
+
         /* 页脚 */
         .footer {
             margin-top: 48px;
@@ -716,6 +764,10 @@
                     '喜马拉雅 “月度新锐主播” (2026.11)',
                     '[待补：英语四/六级、计算机等级证书]'
                 ],
+                certImages: [
+                    { name: '初级', label: '初级 · 证书 1', src: 'cert-images/初级.jpg' },
+                    { name: '高级', label: '高级 · 证书 2', src: 'cert-images/高级.jpg' }
+                ],
                 motto: '“顺其自然，从不内耗；十年运道龙困井，一朝得势入青云。”——热爱宋词与石油的工科声优，持续用有声表达传递能源故事。'
             };
 
@@ -888,6 +940,7 @@
                 const container = document.getElementById('education');
                 const edu = resume.education;
                 const certs = resume.certificates.map(c => `<span class="cert-item">${c}</span>`).join('');
+                const certImgs = (resume.certImages || []).map(ci => `<div class="cert-img-card" onclick="openLightbox('${ci.src}','${ci.label}')"><img src="${ci.src}" alt="${ci.label}" loading="lazy"><div class="cert-img-caption">${ci.label}</div></div>`).join('');
 
                 container.innerHTML = `
                     <div class="section">
@@ -903,6 +956,7 @@
                             <div class="cert-block">
                                 <h3>📜 证书 & 荣誉</h3>
                                 <div>${certs}</div>
+                                <div class="cert-images">${certImgs}</div>
                             </div>
                         </div>
                     </div>
@@ -936,4 +990,61 @@
             function setupThemeToggle() {
                 const btn = document.getElementById('themeToggle');
                 btn.addEventListener('click', () => {
-                    const root = document.documentElement
+                    const root = document.documentElement;
+                    const current = root.getAttribute('data-theme') || 'dark';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    root.setAttribute('data-theme', next);
+                    try { localStorage.setItem('theme', next); } catch(e) {}
+                    btn.textContent = next === 'dark' ? '🌙 深色' : '☀️ 浅色';
+                });
+                try {
+                    const saved = localStorage.getItem('theme');
+                    if (saved) {
+                        document.documentElement.setAttribute('data-theme', saved);
+                        btn.textContent = saved === 'dark' ? '🌙 深色' : '☀️ 浅色';
+                    }
+                } catch(e) {}
+            }
+
+            // ---------- 灯箱 ----------
+            function openLightbox(src, caption) {
+                const lb = document.getElementById('lightbox');
+                lb.querySelector('img').src = src;
+                lb.querySelector('.lightbox-caption').textContent = caption;
+                lb.classList.add('active');
+            }
+            function closeLightbox() {
+                document.getElementById('lightbox').classList.remove('active');
+            }
+
+            // ---------- 初始化 ----------
+            renderHero();
+            renderHighlights();
+            renderExperience();
+            renderProjects();
+            renderSkills();
+            renderEducation();
+            renderFooter();
+            setupBackTop();
+            setupThemeToggle();
+
+            document.getElementById('lightbox').addEventListener('click', function(e) {
+                if (e.target === this || e.target.classList.contains('lightbox-close')) closeLightbox();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeLightbox();
+            });
+            document.getElementById('printBtn').addEventListener('click', function() {
+                window.print();
+            });
+        </script>
+
+        <!-- 灯箱 -->
+        <div class="lightbox" id="lightbox">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img src="" alt="">
+            <div class="lightbox-caption"></div>
+        </div>
+
+        </body>
+        </html>
